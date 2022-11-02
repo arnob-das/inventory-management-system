@@ -30,11 +30,11 @@ const productSchema = mongoose.Schema(
     },
     unit: {
       type: String,
-      required: [true, "Unit is required"],
+      required: true,
       enum: {
-        value: ["kg", "litre", "pcs"],
-        message: "Unit value can't be {VALUE}, must be kg/litre/pcs",
-      },
+        values: ["kg", "litre", "pcs"],
+        message: "Unit value must be kg,litre or pcs",
+      }
     },
     quantity: {
       type: Number,
@@ -55,7 +55,8 @@ const productSchema = mongoose.Schema(
     status: {
       type: String,
       enum: {
-        value: ["in-stock", "out-of-stock", "discontinued"],
+        // must be values(plural)... not value(singular)
+        values: ["in-stock", "out-of-stock", "discontinued"],
         message: "Status can't be {VALUE}",
       },
     },
@@ -67,27 +68,66 @@ const productSchema = mongoose.Schema(
     //   type: Date,
     //   default: Date.now()
     // }
-    supplier: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Supplier",
-    },
-    categories: [{
-      name: {
-        type: String,
-        required: true
-      },
-      name: {
-        _id: mongoose.Schema.Types.ObjectId
-      }
-    }]
+    // supplier: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Supplier",
+    // },
+    // categories: [{
+    //   name: {
+    //     type: String,
+    //     required: true
+    //   },
+    //   name: {
+    //     _id: mongoose.Schema.Types.ObjectId
+    //   }
+    // }]
   },
   {
-    timestamps: ture,
+    timestamps: true,
   }
 );
+
+
+
+// SCHEMA -> MODEL -> QUERY
+
+const Product = mongoose.model('Product', productSchema)
 
 app.get("/", (req, res) => {
   res.send("Route is working! YaY!");
 });
+
+// posting in database
+app.post('/api/v1/product', async (req, res, next) => {
+
+  try {
+    // save
+    const product = new Product(req.body);
+    // instance creation --> Do Something --> save()
+    if (product.quantity == 0) {
+      product.status = 'out-of-stock'
+    }
+    // save to database
+    const result = await product.save();
+
+
+    // Create
+    //const result = await Product.create(req.body)
+
+    res.status(200).json({
+      status: 'success',
+      message: "Data inserted successfully",
+      data: result
+    })
+  } catch (error) {
+    res.status(400).json({
+      status: 'failed',
+      message: "Data in not inserted",
+      error: error.message
+    })
+  }
+
+
+})
 
 module.exports = app;
