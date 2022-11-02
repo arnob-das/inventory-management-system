@@ -88,6 +88,20 @@ const productSchema = mongoose.Schema(
 );
 
 
+// mongoose middlewares for saving data : pre/post
+productSchema.pre('save', function (next) {
+  console.log('before sving data');
+  if (this.quantity == 0) {
+    this.status = 'out-of-stock'
+  }
+  next();
+})
+
+// productSchema.post('save', function (doc, next) {
+//   console.log('after sving data');
+//   next();
+// })
+
 
 // SCHEMA -> MODEL -> QUERY
 
@@ -104,9 +118,9 @@ app.post('/api/v1/product', async (req, res, next) => {
     // save
     const product = new Product(req.body);
     // instance creation --> Do Something --> save()
-    if (product.quantity == 0) {
-      product.status = 'out-of-stock'
-    }
+    // if (product.quantity == 0) {
+    //   product.status = 'out-of-stock'
+    // }
     // save to database
     const result = await product.save();
 
