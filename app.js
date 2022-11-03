@@ -158,7 +158,12 @@ app.post('/api/v1/product', async (req, res, next) => {
 // get route
 app.get("/api/v1/product", async (req, res) => {
   try {
-    const product = await Product.find({}).select({name:1})
+    const product = await Product
+      .where("name").equals(/\w/)
+      .where("quantity").gt(10).lt(600)
+      .limit(2).sort({ quantity: -1 })
+
+
     res.status(200).json({
       status: 'success',
       data: product
