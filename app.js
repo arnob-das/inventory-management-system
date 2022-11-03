@@ -89,6 +89,8 @@ const productSchema = mongoose.Schema(
 
 
 // mongoose middlewares for saving data : pre/post
+
+// pre middleware
 productSchema.pre('save', function (next) {
   console.log('before sving data');
   if (this.quantity == 0) {
@@ -97,15 +99,22 @@ productSchema.pre('save', function (next) {
   next();
 })
 
+// post middleware
+
 // productSchema.post('save', function (doc, next) {
 //   console.log('after sving data');
 //   next();
 // })
 
 
+productSchema.method.logger = function () {
+  console.log(`Data saved ${this.name}`);
+}
+
+
 // SCHEMA -> MODEL -> QUERY
 
-const Product = mongoose.model('Product', productSchema)
+const Product = mongoose.model('Product', productSchema);
 
 app.get("/", (req, res) => {
   res.send("Route is working! YaY!");
@@ -116,23 +125,27 @@ app.post('/api/v1/product', async (req, res, next) => {
 
   try {
     // save
-    const product = new Product(req.body);
+    //const product = new Product(req.body);
     // instance creation --> Do Something --> save()
     // if (product.quantity == 0) {
     //   product.status = 'out-of-stock'
     // }
     // save to database
-    const result = await product.save();
+    //const result = await product.save();
+    // result.logger;
 
 
     // Create
-    //const result = await Product.create(req.body)
+    const result = await Product.create(req.body)
+    result.logger;
 
     res.status(200).json({
       status: 'success',
       message: "Data inserted successfully",
       data: result
     })
+
+    next();
   } catch (error) {
     res.status(400).json({
       status: 'failed',
@@ -140,8 +153,23 @@ app.post('/api/v1/product', async (req, res, next) => {
       error: error.message
     })
   }
+})
 
-
+// get route
+app.get("/api/v1/product", async (req, res) => {
+  try {
+    const product = await Product.find({ $or: [{ _id: '6362a16868c9a84d2cbabc2b' }, { name: "Mobile" }] })
+    res.status(200).json({
+      status: 'success',
+      data: product
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'failed',
+      message: "Can't get the data",
+      error: error.message
+    })
+  }
 })
 
 module.exports = app;
