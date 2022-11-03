@@ -158,7 +158,7 @@ app.post('/api/v1/product', async (req, res, next) => {
 // get route
 app.get("/api/v1/product", async (req, res) => {
   try {
-    const product = await Product.find({ $or: [{ _id: '6362a16868c9a84d2cbabc2b' }, { name: "Mobile" }] })
+    const product = await Product.find({}, "-name -quantity")
     res.status(200).json({
       status: 'success',
       data: product
