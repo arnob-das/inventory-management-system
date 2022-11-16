@@ -10,8 +10,6 @@ app.use(cors());
 // routes
 const productRoute = require('./routes/product.route')
 
-
-
 app.get("/", (req, res) => {
   res.send("Route is working! YaY!");
 });
